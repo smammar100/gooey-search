@@ -2,7 +2,7 @@
 
 _This demo presents a ready-to-use search bar built with Framer Motion, featuring a gooey effect for an exceptionally smooth experience. The interactive design offers a fluid and modern search functionality that can seamlessly integrate into your web projects._
 
-![Image Title](https://generative-placeholders.glitch.me/image?width=800&height=600")
+![Gooey Search preview](https://github.com/oguzhantufenk/gooey-search/blob/main/gooey-search.gif)
 
 [Article on Codrops](https://tympanus.net/codrops/?p=)
 
