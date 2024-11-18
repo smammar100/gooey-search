@@ -4,9 +4,9 @@ _This demo presents a ready-to-use search bar built with Framer Motion, featurin
 
 ![Gooey Search preview](https://github.com/oguzhantufenk/gooey-search/blob/main/gooey-search.gif)
 
-[Article on Codrops](https://tympanus.net/codrops/?p=)
+[Article on Codrops](https://tympanus.net/codrops/2024/11/18/how-to-create-a-gooey-search-interaction-with-framer-motion-and-react/)
 
-[Demo](https://tympanus.net/Development/.../)
+[Demo](https://tympanus.net/Tutorials/GooeySearch/)
 
 ## Installation
 
