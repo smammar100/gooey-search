@@ -1,149 +1,237 @@
-import { useState } from "react";
-import { format } from "date-fns";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import clsx from "clsx";
+
+// Utils
+import { isUnsupportedBrowser } from "./utils/isUnsupportedBrowser";
+
+// Hooks
+import useDebounce from "./hooks/useDebounce";
+
+// Components
+import GooeyFilter from "./components/GooeyFilter";
+import SearchIcon from "./components/SearchIcon";
+import LoadingIcon from "./components/LoadingIcon";
+import InfoIcon from "./components/InfoIcon";
+
+// Data
+import { dummyData } from "./dummyData";
+
+const buttonVariants = {
+  initial: { x: 0, width: 100 },
+  step1: { x: 0, width: 100 },
+  step2: { x: -30, width: 180 },
+};
+
+const iconVariants = {
+  hidden: { x: -50, opacity: 0 },
+  visible: { x: 16, opacity: 1 },
+};
+
+const getResultItemVariants = (index, isUnsupported) => ({
+  initial: {
+    y: 0,
+    scale: 0.3,
+    filter: isUnsupported ? "none" : "blur(10px)",
+  },
+  animate: {
+    y: (index + 1) * 50,
+    scale: 1,
+    filter: "blur(0px)",
+  },
+  exit: {
+    y: isUnsupported ? 0 : -4,
+    scale: 0.8,
+    color: "#000000",
+  },
+});
+
+const getResultItemTransition = (index) => ({
+  duration: 0.75,
+  delay: index * 0.12,
+  type: "spring",
+  bounce: 0.35,
+  exit: { duration: index * 0.1 },
+  filter: { ease: "easeInOut" },
+});
 
 function App() {
-  const [query, setQuery] = useState("React.js framework");
+  const inputRef = useRef(null);
 
-  const searchResults = [
-    {
-      title: "React – A JavaScript library for building user interfaces",
-      url: "https://react.dev",
-      snippet: "React is a JavaScript library for building user interfaces. Learn what React is all about on our homepage or in the tutorial.",
-      timestamp: new Date("2024-02-15")
-    },
-    {
-      title: "Getting Started with React - A Comprehensive Guide",
-      url: "https://react.dev/learn",
-      snippet: "React makes it painless to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes.",
-      timestamp: new Date("2024-02-10")
-    },
-    {
-      title: "React (software) - Wikipedia",
-      url: "https://en.wikipedia.org/wiki/React_(software)",
-      snippet: "React (also known as React.js or ReactJS) is a free and open-source front-end JavaScript library for building user interfaces based on components.",
-      timestamp: new Date("2024-01-20")
+  const [state, setState] = useState({
+    step: 1, // 1: Initial, 2: Search
+    searchData: [],
+    searchText: "",
+    isLoading: false,
+  });
+
+  const debouncedSearchText = useDebounce(state.searchText, 500);
+  const isUnsupported = useMemo(() => isUnsupportedBrowser(), []);
+
+  const handleButtonClick = () => {
+    setState((prevState) => ({ ...prevState, step: 2 }));
+  };
+
+  const handleSearch = (e) => {
+    setState((prevState) => ({ ...prevState, searchText: e.target.value }));
+  };
+
+  useEffect(() => {
+    if (state.step === 2) {
+      inputRef.current?.focus();
+    } else {
+      setState((prevState) => ({
+        ...prevState,
+        searchText: "",
+        searchData: [],
+        isLoading: false,
+      }));
     }
-  ];
+  }, [state.step]);
 
-  const peopleAlsoAsk = [
-    "What is React.js used for?",
-    "Is React.js frontend or backend?",
-    "Is React.js free to use?",
-    "How long does it take to learn React.js?"
-  ];
+  useEffect(() => {
+    let isCancelled = false;
 
-  const relatedSearches = [
-    "React.js vs Angular",
-    "React.js tutorial",
-    "React.js jobs",
-    "React.js examples",
-    "React.js documentation",
-    "React.js vs Vue.js",
-    "React.js projects",
-    "React.js certification"
-  ];
+    if (debouncedSearchText) {
+      setState((prevState) => ({ ...prevState, isLoading: true }));
+
+      const fetchData = async () => {
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          const filteredData = dummyData.filter((item) =>
+            item
+              .toLowerCase()
+              .includes(debouncedSearchText.trim().toLowerCase())
+          );
+
+          if (!isCancelled) {
+            setState((prevState) => ({
+              ...prevState,
+              searchData: filteredData,
+              isLoading: false,
+            }));
+          }
+        } catch {
+          if (!isCancelled) {
+            setState((prevState) => ({ ...prevState, isLoading: false }));
+          }
+        }
+      };
+
+      fetchData();
+    } else {
+      setState((prevState) => ({
+        ...prevState,
+        searchData: [],
+        isLoading: false,
+      }));
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [debouncedSearchText]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Search Bar */}
-      <div className="border-b shadow-sm sticky top-0 bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-500" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 outline-none text-lg"
-            />
-          </div>
-        </div>
-      </div>
+    <div className={clsx("wrapper", isUnsupported && "no-goo")}>
+      <GooeyFilter />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            {/* Search Results */}
-            <div className="space-y-8">
-              {searchResults.map((result, index) => (
-                <div key={index} className="space-y-1">
-                  <a href={result.url} className="group">
-                    <h2 className="text-xl text-search-title group-hover:underline">{result.title}</h2>
-                    <p className="text-search-url text-sm">{result.url}</p>
-                    <p className="text-search-text mt-1">{result.snippet}</p>
-                    <p className="text-search-text text-sm">{format(result.timestamp, 'MMM d, yyyy')}</p>
-                  </a>
-                </div>
-              ))}
-            </div>
-
-            {/* People Also Ask */}
-            <div className="mt-8 border rounded-lg">
-              <h3 className="text-lg font-medium p-4 border-b">People also ask</h3>
-              <div className="divide-y">
-                {peopleAlsoAsk.map((question, index) => (
-                  <button key={index} className="w-full text-left p-4 hover:bg-gray-50">
-                    {question}
-                  </button>
+      <div className="button-content">
+        <motion.div
+          className="button-content-inner"
+          initial="initial"
+          animate={state.step === 1 ? "step1" : "step2"}
+          transition={{ duration: 0.75, type: "spring", bounce: 0.15 }}
+        >
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key="search-text-wrapper"
+              className="search-results"
+              role="listbox"
+              aria-label="Search results"
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{
+                delay: isUnsupported ? 0.5 : 1.25,
+                duration: 0.5,
+              }}
+            >
+              <AnimatePresence mode="popLayout">
+                {state.searchData.map((item, index) => (
+                  <motion.div
+                    key={item}
+                    whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                    variants={getResultItemVariants(index, isUnsupported)}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={getResultItemTransition(index, isUnsupported)}
+                    className="search-result"
+                    role="option"
+                  >
+                    <div className="search-result-title">
+                      <InfoIcon index={index} />
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.12 + 0.3 }}
+                      >
+                        {item}
+                      </motion.span>
+                    </div>
+                  </motion.div>
                 ))}
-              </div>
-            </div>
+              </AnimatePresence>
+            </motion.div>
+          </AnimatePresence>
 
-            {/* Related Searches */}
-            <div className="mt-8">
-              <h3 className="text-lg font-medium mb-4">Related searches</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {relatedSearches.map((term, index) => (
-                  <button key={index} className="text-left text-search-title hover:underline">
-                    {term}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-8 flex justify-center gap-2">
-              {[1, 2, 3, 4, 5].map((page) => (
-                <button
-                  key={page}
-                  className={`px-3 py-2 ${page === 1 ? 'text-white bg-blue-500' : 'text-blue-500 hover:bg-gray-100'} rounded`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Knowledge Panel */}
-          <div className="lg:col-span-1">
-            <div className="border rounded-lg p-4">
-              <h2 className="text-xl font-medium mb-4">React (JavaScript library)</h2>
-              <img
-                src="https://images.pexels.com/photos/11035471/pexels-photo-11035471.jpeg"
-                alt="React"
-                className="w-full rounded-lg mb-4"
+          <motion.div
+            variants={buttonVariants}
+            onClick={handleButtonClick}
+            whileHover={{ scale: state.step === 2 ? 1 : 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="search-btn"
+            role="button"
+          >
+            {state.step === 1 ? (
+              <span className="search-text">Search</span>
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                className="search-input"
+                placeholder="Type to search..."
+                aria-label="Search input"
+                onChange={handleSearch}
               />
-              <p className="text-search-text mb-4">
-                React is a free and open-source front-end JavaScript library for building user interfaces based on components.
-              </p>
-              <div className="space-y-2">
-                <div className="grid grid-cols-3">
-                  <span className="font-medium">Initial release</span>
-                  <span className="col-span-2">May 29, 2013</span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="font-medium">Developer</span>
-                  <span className="col-span-2">Meta and community</span>
-                </div>
-                <div className="grid grid-cols-3">
-                  <span className="font-medium">Written in</span>
-                  <span className="col-span-2">JavaScript</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+            )}
+          </motion.div>
+
+          <AnimatePresence mode="wait">
+            {state.step === 2 && (
+              <motion.div
+                key="icon"
+                className="separate-element"
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={iconVariants}
+                transition={{
+                  delay: 0.1,
+                  duration: 0.85,
+                  type: "spring",
+                  bounce: 0.15,
+                }}
+              >
+                {!state.isLoading ? (
+                  <SearchIcon isUnsupported={isUnsupported} />
+                ) : (
+                  <LoadingIcon />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );
