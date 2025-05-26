@@ -176,39 +176,45 @@ h6 {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 16px;
         border-radius: 9999px;
         @include media("<tablet") {
           scale: 1.1;
           top: 2px;
         }
 
-        svg {
-          width: 20px;
-          height: 20px;
-          cursor: pointer;
-          @include media("<tablet") {
-            width: 24px;
-            height: 24px;
-          }
-          path {
-            fill: #dddddd;
-          }
-          &.loading-icon {
+        .icon-container {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 4px;
+
+          svg {
             width: 20px;
             height: 20px;
-            animation: rotate 0.5s linear infinite;
-            transform-origin: center center;
+            cursor: pointer;
+            @include media("<tablet") {
+              width: 24px;
+              height: 24px;
+            }
+            path {
+              fill: #dddddd;
+            }
+            &.loading-icon {
+              width: 20px;
+              height: 20px;
+              animation: rotate 0.5s linear infinite;
+              transform-origin: center center;
 
-            @keyframes rotate {
-              100% {
-                transform: rotate(180deg);
+              @keyframes rotate {
+                100% {
+                  transform: rotate(180deg);
+                }
               }
             }
-          }
-          &.close-icon {
-            &:hover {
-              opacity: 0.8;
+            &.close-icon {
+              &:hover {
+                opacity: 0.8;
+              }
             }
           }
         }
