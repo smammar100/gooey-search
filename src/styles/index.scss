@@ -84,6 +84,7 @@ h6 {
         .search-results {
           .search-result {
             padding: 7.5px 10px;
+            cursor: pointer;
           }
         }
         .search-btn {
@@ -125,6 +126,7 @@ h6 {
           position: absolute;
           left: -30px;
           font-size: 14px;
+          cursor: pointer;
           .search-result-title {
             display: flex;
             align-items: center;
@@ -186,7 +188,7 @@ h6 {
           width: 20px;
           height: 20px;
           @include media("<tablet") {
-            width: 24epx;
+            width: 24px;
             height: 24px;
           }
           path {

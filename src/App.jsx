@@ -76,6 +76,16 @@ function App() {
     setState((prevState) => ({ ...prevState, searchText: e.target.value }));
   };
 
+  const handleClose = () => {
+    setState((prevState) => ({
+      ...prevState,
+      step: 1,
+      searchText: "",
+      searchData: [],
+      isLoading: false,
+    }));
+  };
+
   useEffect(() => {
     if (state.step === 2) {
       inputRef.current?.focus();
@@ -168,6 +178,12 @@ function App() {
                     transition={getResultItemTransition(index, isUnsupported)}
                     className="search-result"
                     role="option"
+                    onClick={() => {
+                      setState((prevState) => ({
+                        ...prevState,
+                        searchText: item,
+                      }));
+                    }}
                   >
                     <div className="search-result-title">
                       <InfoIcon index={index} />
@@ -187,7 +203,7 @@ function App() {
 
           <motion.div
             variants={buttonVariants}
-            onClick={handleButtonClick}
+            onClick={state.step === 1 ? handleButtonClick : undefined}
             whileHover={{ scale: state.step === 2 ? 1 : 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="search-btn"
@@ -202,6 +218,7 @@ function App() {
                 className="search-input"
                 placeholder="Type to search..."
                 aria-label="Search input"
+                value={state.searchText}
                 onChange={handleSearch}
               />
             )}
@@ -222,6 +239,8 @@ function App() {
                   type: "spring",
                   bounce: 0.15,
                 }}
+                onClick={handleClose}
+                style={{ cursor: "pointer" }}
               >
                 {!state.isLoading ? (
                   <SearchIcon isUnsupported={isUnsupported} />
