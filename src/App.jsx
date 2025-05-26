@@ -235,16 +235,14 @@ function App() {
                   bounce: 0.15,
                 }}
               >
-                <div className="icon-container">
-                  {!state.isLoading ? (
-                    <>
-                      <SearchIcon isUnsupported={isUnsupported} />
-                      <CloseIcon onClick={handleClose} />
-                    </>
-                  ) : (
-                    <LoadingIcon />
-                  )}
-                </div>
+                {!state.isLoading ? (
+                  <>
+                    <SearchIcon isUnsupported={isUnsupported} />
+                    <CloseIcon onClick={handleClose} />
+                  </>
+                ) : (
+                  <LoadingIcon />
+                )}
               </motion.div>
             )}
           </AnimatePresence>
