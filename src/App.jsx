@@ -13,7 +13,6 @@ import GooeyFilter from "./components/GooeyFilter";
 import SearchIcon from "./components/SearchIcon";
 import LoadingIcon from "./components/LoadingIcon";
 import InfoIcon from "./components/InfoIcon";
-import CloseIcon from "./components/CloseIcon";
 
 // Data
 import { dummyData } from "./dummyData";
@@ -75,16 +74,6 @@ function App() {
 
   const handleSearch = (e) => {
     setState((prevState) => ({ ...prevState, searchText: e.target.value }));
-  };
-
-  const handleClose = () => {
-    setState((prevState) => ({ 
-      ...prevState, 
-      step: 1,
-      searchText: "",
-      searchData: [],
-      isLoading: false 
-    }));
   };
 
   useEffect(() => {
@@ -198,7 +187,7 @@ function App() {
 
           <motion.div
             variants={buttonVariants}
-            onClick={state.step === 1 ? handleButtonClick : undefined}
+            onClick={handleButtonClick}
             whileHover={{ scale: state.step === 2 ? 1 : 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="search-btn"
@@ -214,7 +203,6 @@ function App() {
                 placeholder="Type to search..."
                 aria-label="Search input"
                 onChange={handleSearch}
-                value={state.searchText}
               />
             )}
           </motion.div>
@@ -236,10 +224,7 @@ function App() {
                 }}
               >
                 {!state.isLoading ? (
-                  <>
-                    <SearchIcon isUnsupported={isUnsupported} />
-                    <CloseIcon onClick={handleClose} />
-                  </>
+                  <SearchIcon isUnsupported={isUnsupported} />
                 ) : (
                   <LoadingIcon />
                 )}

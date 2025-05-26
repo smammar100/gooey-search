@@ -176,7 +176,6 @@ h6 {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 16px;
         border-radius: 9999px;
         @include media("<tablet") {
           scale: 1.1;
@@ -186,9 +185,8 @@ h6 {
         svg {
           width: 20px;
           height: 20px;
-          cursor: pointer;
           @include media("<tablet") {
-            width: 24px;
+            width: 24epx;
             height: 24px;
           }
           path {
@@ -204,11 +202,6 @@ h6 {
               100% {
                 transform: rotate(180deg);
               }
-            }
-          }
-          &.close-icon {
-            &:hover {
-              opacity: 0.8;
             }
           }
         }
